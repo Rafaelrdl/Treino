@@ -370,19 +370,21 @@ function renderDias(){
   const hojeDia = new Date().getDay();
   const alvo = document.getElementById('dias');
   alvo.innerHTML = '';
-  ORDEM.forEach(k => {
-    const t = PLANO[k];
+  const SEMANA = ['A','B','C','OFF','D','E','F'];
+  SEMANA.forEach(k => {
     const b = document.createElement('button');
-    b.className = 'dia' + (k === diaAtivo ? ' on' : '') + (t.diaSemana === hojeDia ? ' hoje' : '');
-    b.innerHTML = '<b>'+k+'</b>'+t.rotulo;
-    b.onclick = () => { diaAtivo = k; abertos.clear(); render(); };
+    if(k === 'OFF'){
+      b.className = 'dia' + (diaAtivo === 'OFF' ? ' on' : '') + (hojeDia === 4 ? ' hoje' : '');
+      b.innerHTML = '<b>—</b>Qui';
+      b.onclick = () => { diaAtivo = 'OFF'; render(); };
+    }else{
+      const t = PLANO[k];
+      b.className = 'dia' + (k === diaAtivo ? ' on' : '') + (t.diaSemana === hojeDia ? ' hoje' : '');
+      b.innerHTML = '<b>'+k+'</b>'+t.rotulo;
+      b.onclick = () => { diaAtivo = k; abertos.clear(); render(); };
+    }
     alvo.appendChild(b);
   });
-  const off = document.createElement('button');
-  off.className = 'dia' + (hojeDia === 4 ? ' hoje' : '') + (diaAtivo === 'OFF' ? ' on' : '');
-  off.innerHTML = '<b>—</b>Qui';
-  off.onclick = () => { diaAtivo = 'OFF'; render(); };
-  alvo.appendChild(off);
   document.getElementById('sub').textContent =
     diaAtivo === 'OFF' ? 'Quinta · descanso' : PLANO[diaAtivo].rotulo + ' · ' + PLANO[diaAtivo].nome;
 }
