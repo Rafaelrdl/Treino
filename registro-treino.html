@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E8620C">
+<title>Registro de Treino — Rafael</title>
+<style>
+  :root{
+    --paper:#FFFFFF;
+    --field:#F1F0EC;
+    --ink:#1C1A17;
+    --muted:#6E6A63;
+    --rule:#DCD8D1;
+    --orange:#E8620C;
+    --orange-soft:#FDF0E6;
+    --up:#0E7A3D;
+    --down:#A33A2A;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--field);
+    color:var(--ink);
+    font-family:"Inter","Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    font-size:16px;line-height:1.45;
+    padding-bottom:96px;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:620px;margin:0 auto;padding:0 12px}
+  input,select,button,textarea{font:inherit;color:inherit}
+  button{cursor:pointer}
+
+  /* ---------- topo ---------- */
+  header{position:sticky;top:0;z-index:30;background:var(--paper);border-bottom:2px solid var(--ink)}
+  .bar{display:flex;align-items:center;gap:10px;padding:10px 12px;max-width:620px;margin:0 auto}
+  .mark{width:30px;height:30px;border-radius:50%;flex:none;background:var(--orange);display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px}
+  .titulo{font-weight:700;letter-spacing:-.01em;margin-right:auto}
+  .titulo small{display:block;font-weight:400;font-size:12px;color:var(--muted);letter-spacing:0}
+  .icone{background:none;border:1.5px solid var(--rule);border-radius:8px;width:38px;height:38px;display:grid;place-items:center;font-size:17px;color:var(--muted)}
+  .icone:active{background:var(--field)}
+
+  .dias{display:flex;gap:6px;padding:0 12px 10px;max-width:620px;margin:0 auto;overflow-x:auto;scrollbar-width:none}
+  .dias::-webkit-scrollbar{display:none}
+  .dia{flex:none;border:1.5px solid var(--rule);background:var(--paper);border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;align-items:center;min-width:56px;gap:1px}
+  .dia b{font-size:15px;font-weight:800;color:var(--ink)}
+  .dia.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .dia.on b{color:#fff}
+  .dia.hoje:not(.on){border-color:var(--orange);color:var(--orange)}
+  .dia.hoje:not(.on) b{color:var(--orange)}
+
+  /* ---------- faixa ---------- */
+  .faixa{background:var(--orange);color:#fff;border-radius:var(--radius) var(--radius) 0 0;padding:11px 14px;margin-top:14px;display:flex;align-items:baseline;gap:10px}
+  .faixa h2{margin:0;font-size:17px;font-weight:800;letter-spacing:-.01em}
+  .faixa span{font-size:12.5px;opacity:.9;margin-left:auto;white-space:nowrap}
+  .datalinha{background:var(--paper);border:1px solid var(--rule);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .datalinha label{font-size:13px;color:var(--muted)}
+  input[type=date]{border:1.5px solid var(--rule);border-radius:8px;padding:7px 9px;background:var(--paper);font-size:14px;font-weight:600}
+  .salvo{margin-left:auto;font-size:12px;color:var(--up);opacity:0;transition:opacity .25s}
+  .salvo.ver{opacity:1}
+
+  /* ---------- exercício ---------- */
+  .ex{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);margin-top:10px;overflow:hidden}
+  .ex-topo{padding:11px 14px 8px}
+  .ex-nome{font-style:italic;font-weight:700;font-size:16px;letter-spacing:-.01em;line-height:1.25}
+  .ex-meta{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .ex-meta code{font-family:inherit;background:var(--field);border-radius:4px;padding:1px 6px;font-weight:600;color:var(--ink)}
+  .delta{margin-left:auto;font-weight:700;font-size:12.5px;white-space:nowrap}
+  .delta.up{color:var(--up)}
+  .delta.eq{color:var(--muted)}
+  .delta.down{color:var(--down)}
+
+  .principal{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:2px 14px 10px}
+  .campo{position:relative}
+  .campo input{width:100%;border:1.5px solid var(--rule);border-radius:9px;padding:12px 34px 12px 12px;background:var(--field);font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+  .campo input:focus{outline:none;border-color:var(--orange);background:var(--paper)}
+  .campo u{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);text-decoration:none;pointer-events:none;font-weight:600}
+
+  .rodape-ex{display:flex;align-items:center;gap:10px;padding:0 14px 11px;font-size:12.5px;color:var(--muted)}
+  .repetir{background:var(--orange-soft);border:1px solid #F6D9C2;color:var(--orange);border-radius:7px;padding:6px 10px;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums}
+  .repetir:active{background:#FBE2CE}
+  .abrir{margin-left:auto;background:none;border:none;color:var(--muted);font-size:12.5px;font-weight:600;padding:6px 0}
+  .abrir:active{color:var(--orange)}
+
+  .series{border-top:1px dashed var(--rule);background:#FAFAF8;padding:4px 0}
+  .linha{display:grid;grid-template-columns:38px 1fr 1fr;gap:7px;align-items:center;padding:5px 14px}
+  .linha .campo input{font-size:15px;font-weight:700;padding:8px 26px 8px 10px;background:var(--paper)}
+  .linha .campo u{right:8px;font-size:10.5px}
+  .tag{font-size:10.5px;font-weight:800;text-align:center;border-radius:5px;padding:4px 0;background:var(--field);color:var(--muted)}
+  .tag.WS{background:var(--ink);color:#fff}
+  .tag.DS,.tag.STS,.tag.RP{background:var(--orange-soft);color:var(--orange)}
+  .dica{padding:4px 14px 9px;font-size:11.5px;color:var(--muted);line-height:1.4}
+
+  /* ---------- rodapé da sessão ---------- */
+  .fim{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);margin-top:10px;padding:13px 14px}
+  .fim h3{margin:0 0 9px;font-size:14px;font-weight:700}
+  .pse{display:flex;gap:6px;margin-bottom:11px}
+  .pse button{flex:1;border:1.5px solid var(--rule);background:var(--paper);border-radius:8px;padding:9px 4px;font-size:12.5px;font-weight:600;color:var(--muted)}
+  .pse button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  textarea{width:100%;border:1.5px solid var(--rule);border-radius:8px;padding:10px;background:var(--field);font-size:14.5px;resize:vertical;min-height:70px}
+  textarea:focus{outline:none;border-color:var(--orange);background:var(--paper)}
+
+  .vazio{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);padding:22px 18px;margin-top:10px}
+  .vazio h3{margin:0 0 8px;font-size:17px;font-style:italic}
+  .vazio p{margin:0 0 6px;font-size:14.5px;color:var(--muted)}
+  .vazio ul{margin:10px 0 0;padding-left:18px;font-size:14.5px;color:var(--muted)}
+  .vazio li{margin-bottom:5px}
+
+  .sessao{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);margin-top:9px;overflow:hidden}
+  .sessao summary{list-style:none;padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:14.5px}
+  .sessao summary::-webkit-details-marker{display:none}
+  .pill{background:var(--ink);color:#fff;border-radius:5px;font-size:11.5px;font-weight:800;padding:3px 7px;flex:none}
+  .sessao summary em{font-style:normal;color:var(--muted);font-size:12.5px;margin-left:auto}
+  .detalhe{padding:0 14px 13px;font-size:13.5px}
+  .detalhe div{padding:5px 0;border-top:1px solid #F2F0EC;display:flex;gap:10px}
+  .detalhe span:first-child{font-style:italic;flex:1}
+  .detalhe span:last-child{font-variant-numeric:tabular-nums;color:var(--muted);text-align:right;white-space:nowrap}
+  .nota{margin-top:9px;padding:9px 11px;background:var(--field);border-radius:8px;font-size:13.5px}
+
+  select.sel{width:100%;border:1.5px solid var(--rule);border-radius:8px;padding:11px 10px;background:var(--paper);font-size:15px;font-weight:600;margin-top:10px}
+  .graf{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);padding:14px;margin-top:10px}
+  .graf svg{width:100%;height:170px;display:block}
+  .graf-legenda{font-size:12px;color:var(--muted);margin-top:8px}
+  .tabela{margin-top:10px;font-size:13.5px}
+  .tabela div{display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid var(--rule)}
+  .tabela span:last-child{font-variant-numeric:tabular-nums;font-weight:700}
+
+  details.leg{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);margin-top:10px}
+  details.leg summary{padding:12px 14px;font-size:14px;font-weight:600;cursor:pointer}
+  details.leg div{padding:0 14px 13px;font-size:13.5px;color:var(--muted)}
+  details.leg p{margin:0 0 7px}
+  details.leg b{color:var(--ink)}
+
+  nav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--paper);border-top:2px solid var(--ink);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+  nav button{flex:1;background:none;border:none;padding:11px 4px 12px;font-size:12px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px}
+  nav button i{font-style:normal;font-size:18px;line-height:1}
+  nav button.on{color:var(--orange)}
+
+  .timer{position:fixed;right:12px;bottom:78px;z-index:41;display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+  .timer-btn{border:none;background:var(--ink);color:#fff;border-radius:22px;padding:11px 17px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;box-shadow:0 3px 14px rgba(28,26,23,.22)}
+  .timer-btn.rodando{background:var(--orange)}
+  .presets{display:none;flex-direction:column;gap:6px}
+  .presets.ver{display:flex}
+  .presets button{border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);border-radius:18px;padding:7px 14px;font-size:13px;font-weight:700}
+
+  .oculto{display:none}
+  :focus-visible{outline:2.5px solid var(--orange);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="mark">R</div>
+    <div class="titulo">Registro de treino<small id="sub">Push · Legs · Pull · Upper</small></div>
+    <button class="icone" id="btExport" title="Baixar backup">↓</button>
+    <button class="icone" id="btImport" title="Restaurar backup">↑</button>
+    <input type="file" id="arquivo" accept="application/json" class="oculto">
+  </div>
+  <div class="dias" id="dias"></div>
+</header>
+
+<main class="wrap">
+  <section id="abaTreino"></section>
+  <section id="abaHistorico" class="oculto"></section>
+  <section id="abaProgresso" class="oculto"></section>
+</main>
+
+<div class="timer">
+  <div class="presets" id="presets">
+    <button data-s="180">3:00</button>
+    <button data-s="120">2:00</button>
+    <button data-s="90">1:30</button>
+  </div>
+  <button class="timer-btn" id="btTimer">Descanso</button>
+</div>
+
+<nav>
+  <button class="on" data-aba="Treino"><i>▤</i>Treino</button>
+  <button data-aba="Historico"><i>▦</i>Histórico</button>
+  <button data-aba="Progresso"><i>▲</i>Progresso</button>
+</nav>
+
+<script>
+/* ============================================================
+   PLANO
+   ============================================================ */
+const PLANO = {
+  A:{nome:'PUSH', diaSemana:1, rotulo:'Seg', ex:[
+    {id:'a1', nome:'Supino Reto c/ Barra',                sets:4, tipo:'1WU+1FS+2WS'},
+    {id:'a2', nome:'Supino Inclinado 30-45° c/ Halteres', sets:4, tipo:'1FS+3WS'},
+    {id:'a3', nome:'Crucifixo Inclinado ou Voador',       sets:3, tipo:'2WS+1DS'},
+    {id:'a4', nome:'Desenvolvimento Máquina ou Halteres', sets:4, tipo:'1FS+3WS'},
+    {id:'a5', nome:'Elevação Lateral c/ Halteres',        sets:4, tipo:'3WS+1DS', obs:'12-15 reps'},
+    {id:'a6', nome:'Paralelas (movimento profundo)',      sets:3, tipo:'3WS', obs:'até a falha'},
+    {id:'a7', nome:'Tríceps Pulley Corda',                sets:4, tipo:'1FS+2WS+1DS'},
+    {id:'a8', nome:'Tríceps Testa Barra W',               sets:3, tipo:'3WS'}
+  ]},
+  B:{nome:'LEG 1 · QUADRÍCEPS', diaSemana:2, rotulo:'Ter', ex:[
+    {id:'b1', nome:'Agachamento Livre 90°',               sets:5, tipo:'1WU+1FS+3WS'},
+    {id:'b2', nome:'Leg Press 45',                        sets:4, tipo:'1FS+3WS', obs:'último set com RP'},
+    {id:'b3', nome:'Agachamento Hack',                    sets:4, tipo:'1FS+3WS'},
+    {id:'b4', nome:'Búlgaro c/ Halteres',                 sets:3, tipo:'3WS', obs:'10-12 por perna'},
+    {id:'b5', nome:'Extensora',                           sets:4, tipo:'2WS+1DS+1STS'},
+    {id:'b6', nome:'Flexora Deitada (manutenção)',        sets:3, tipo:'3WS'},
+    {id:'b7', nome:'Panturrilha Sentado',                 sets:4, tipo:'1WU+3WS', obs:'15-20 reps'}
+  ]},
+  C:{nome:'PULL', diaSemana:3, rotulo:'Qua', ex:[
+    {id:'c1', nome:'Barra Fixa ou Pulley Frontal Pronado',sets:4, tipo:'1WU+1FS+2WS'},
+    {id:'c2', nome:'Remada Curvada c/ Barra (pronada)',   sets:4, tipo:'1FS+3WS'},
+    {id:'c3', nome:'Remada Baixa Triângulo',              sets:3, tipo:'2WS+1DS'},
+    {id:'c4', nome:'Pull-Down (pullover na polia)',       sets:3, tipo:'3WS', obs:'12-15 reps'},
+    {id:'c5', nome:'Voador Inverso',                      sets:3, tipo:'2WS+1DS', obs:'12-15 reps'},
+    {id:'c6', nome:'Encolhimento c/ Halteres',            sets:3, tipo:'3WS', obs:'12-15 reps'},
+    {id:'c7', nome:'Rosca Direta Barra W',                sets:4, tipo:'1FS+2WS+1DS'},
+    {id:'c8', nome:'Rosca Martelo Sentado',               sets:3, tipo:'3WS'}
+  ]},
+  D:{nome:'UPPER COMPLETO', diaSemana:5, rotulo:'Sex', ex:[
+    {id:'d1', nome:'Supino Máquina ou Supino 45° Halteres',sets:4, tipo:'1WU+1FS+2WS', obs:'supersérie com o próximo'},
+    {id:'d2', nome:'Pulley Frontal Supinado ou Neutro',   sets:4, tipo:'1FS+3WS'},
+    {id:'d3', nome:'Cross Over Polia Média',              sets:3, tipo:'2WS+1DS', obs:'supersérie · 12-15 reps'},
+    {id:'d4', nome:'Remada Máquina / Cavalinho',          sets:3, tipo:'3WS'},
+    {id:'d5', nome:'Desenvolvimento Arnold ou Máquina',   sets:3, tipo:'3WS'},
+    {id:'d6', nome:'Elevação Lateral Cross Unilateral',   sets:4, tipo:'3WS+1DS', obs:'12-15 reps'},
+    {id:'d7', nome:'Tríceps Francês Cross',               sets:3, tipo:'2WS+1DS', obs:'supersérie com o próximo'},
+    {id:'d8', nome:'Rosca Concentrada ou Scott',          sets:3, tipo:'2WS+1DS'},
+    {id:'d9', nome:'Face Pull',                           sets:3, tipo:'3WS', obs:'15-20 reps'},
+    {id:'d10',nome:'Elevação de Panturrilha em Pé',       sets:4, tipo:'1WU+3WS', obs:'12-15 reps'}
+  ]},
+  E:{nome:'LEG 2 · POSTERIOR', diaSemana:6, rotulo:'Sáb', ex:[
+    {id:'e1', nome:'Stiff c/ Barra',                      sets:5, tipo:'1WU+1FS+3WS'},
+    {id:'e2', nome:'Elevação Pélvica (Hip Thrust)',       sets:4, tipo:'1FS+3WS'},
+    {id:'e3', nome:'Flexora Deitada',                     sets:4, tipo:'2WS+1DS+1STS'},
+    {id:'e4', nome:'Flexora Sentada',                     sets:3, tipo:'3WS'},
+    {id:'e5', nome:'Agachamento Sumô ou Leg Press Pés Altos',sets:4, tipo:'1FS+3WS'},
+    {id:'e6', nome:'Cadeira Abdutora',                    sets:3, tipo:'2WS+1DS', obs:'15-20 reps'},
+    {id:'e7', nome:'Passada Longa c/ Barra',              sets:3, tipo:'3WS', obs:'20-24 passos', un:'passos'}
+  ]},
+  F:{nome:'ACESSÓRIOS + CARDIO', diaSemana:0, rotulo:'Dom', ex:[
+    {id:'f1', nome:'Rosca Inclinada c/ Halteres',         sets:4, tipo:'1FS+3WS', obs:'banco 45-60° · 10-12 reps'},
+    {id:'f2', nome:'Rosca Scott ou Máquina',              sets:3, tipo:'2WS+1DS', obs:'10-12 reps'},
+    {id:'f3', nome:'Rosca Martelo Corda no Cross',        sets:3, tipo:'3WS', obs:'12-15 reps'},
+    {id:'f4', nome:'Extensora',                           sets:3, tipo:'3WS', obs:'15-20 reps · RIR 2'},
+    {id:'f5', nome:'Leg Press Pés Baixos e Juntos',       sets:3, tipo:'3WS', obs:'15-20 reps · RIR 2-3'},
+    {id:'f6', nome:'Elevação de Panturrilha em Pé',       sets:4, tipo:'1WU+3WS', obs:'12-15 reps'},
+    {id:'f7', nome:'Elevação de Panturrilha Sentado',     sets:3, tipo:'3WS', obs:'15-20 reps'},
+    {id:'f8', nome:'Abdominal Infra (pernas suspenso)',   sets:3, tipo:'3WS', obs:'12-15 reps'},
+    {id:'f9', nome:'Abdominal Supra na Polia',            sets:3, tipo:'3WS', obs:'15-20 reps'},
+    {id:'f10',nome:'Prancha ou Ab Wheel',                 sets:3, tipo:'3WS', obs:'30-45 segundos', un:'seg'},
+    {id:'f11',nome:'Cardio zona 2',                       sets:1, tipo:'', obs:'25-40 min depois dos pesos', un:'min'}
+  ]}
+};
+const ORDEM = ['A','B','C','D','E','F'];
+
+/* ============================================================
+   PERSISTÊNCIA
+   ============================================================ */
+const CHAVE = 'treino-rafael-v1';
+const temStorage = typeof window !== 'undefined' && window.storage && typeof window.storage.get === 'function';
+
+async function carregar(){
+  try{
+    if(temStorage){
+      const r = await window.storage.get(CHAVE);
+      return r && r.value ? JSON.parse(r.value) : {sessoes:{}};
+    }
+    const bruto = localStorage.getItem(CHAVE);
+    return bruto ? JSON.parse(bruto) : {sessoes:{}};
+  }catch(e){ return {sessoes:{}}; }
+}
+async function gravar(d){
+  try{
+    const texto = JSON.stringify(d);
+    if(temStorage) await window.storage.set(CHAVE, texto);
+    else localStorage.setItem(CHAVE, texto);
+    return true;
+  }catch(e){ return false; }
+}
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+let dados = {sessoes:{}};
+let diaAtivo = 'A';
+let dataAtiva = hojeISO();
+let abaAtiva = 'Treino';
+let exProgresso = 'a1';
+const abertos = new Set();
+
+function hojeISO(){
+  const d = new Date();
+  return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+}
+function chaveSessao(data, dia){ return data + '__' + dia; }
+
+/* registro de um exercício: {kg, reps, series:[{kg,reps}]} */
+function registroDe(sessao, ex){
+  let r = sessao.ex[ex.id];
+  if(Array.isArray(r)){                       // migra formato antigo
+    const preenchidos = r.filter(v => v && (v.kg || v.reps));
+    const base = preenchidos[preenchidos.length-1] || {kg:'', reps:''};
+    r = {kg:base.kg||'', reps:base.reps||'', series:r};
+    sessao.ex[ex.id] = r;
+  }
+  if(!r){ r = {kg:'', reps:'', series:[]}; sessao.ex[ex.id] = r; }
+  if(!Array.isArray(r.series)) r.series = [];
+  while(r.series.length < ex.sets) r.series.push({kg:'', reps:''});
+  return r;
+}
+function temAlgo(r){
+  if(!r) return false;
+  if(Array.isArray(r)) return r.some(v => v && (v.kg || v.reps));
+  return !!(r.kg || r.reps || (r.series||[]).some(v => v && (v.kg || v.reps)));
+}
+function sessaoAtual(){
+  const k = chaveSessao(dataAtiva, diaAtivo);
+  if(!dados.sessoes[k]) dados.sessoes[k] = {data:dataAtiva, dia:diaAtivo, ex:{}, pse:'', nota:''};
+  return dados.sessoes[k];
+}
+function tiposDeSerie(tipo, n){
+  const saida = [];
+  const re = /(\d+)\s*(WU|FS|WS|DS|STS|RP)/g;
+  let m;
+  while((m = re.exec(tipo || ''))) for(let i=0;i<Number(m[1]);i++) saida.push(m[2]);
+  while(saida.length < n) saida.push('WS');
+  return saida.slice(0, n);
+}
+function numero(v){
+  const n = parseFloat(String(v == null ? '' : v).replace(',','.'));
+  return isNaN(n) ? null : n;
+}
+function ultimaVez(ex){
+  const anteriores = Object.values(dados.sessoes)
+    .filter(s => s.dia === diaAtivo && s.data < dataAtiva && temAlgo(s.ex && s.ex[ex.id]))
+    .sort((a,b) => a.data < b.data ? 1 : -1);
+  if(!anteriores.length) return null;
+  const s = anteriores[0];
+  let r = s.ex[ex.id];
+  if(Array.isArray(r)){
+    const p = r.filter(v => v && (v.kg || v.reps));
+    r = {kg:(p[p.length-1]||{}).kg || '', reps:(p[p.length-1]||{}).reps || '', series:r};
+  }
+  return {data:s.data, reg:r};
+}
+
+/* ============================================================
+   SALVAMENTO
+   ============================================================ */
+let timerSalvar = null;
+function agendarSalvar(){
+  clearTimeout(timerSalvar);
+  timerSalvar = setTimeout(async () => {
+    const ok = await gravar(dados);
+    const aviso = document.getElementById('salvo');
+    if(aviso){
+      aviso.textContent = ok ? 'salvo' : 'não foi possível salvar';
+      aviso.style.color = ok ? 'var(--up)' : 'var(--down)';
+      aviso.classList.add('ver');
+      setTimeout(() => aviso.classList.remove('ver'), 1400);
+    }
+  }, 450);
+}
+
+/* ============================================================
+   DIAS
+   ============================================================ */
+function renderDias(){
+  const hojeDia = new Date().getDay();
+  const alvo = document.getElementById('dias');
+  alvo.innerHTML = '';
+  ORDEM.forEach(k => {
+    const t = PLANO[k];
+    const b = document.createElement('button');
+    b.className = 'dia' + (k === diaAtivo ? ' on' : '') + (t.diaSemana === hojeDia ? ' hoje' : '');
+    b.innerHTML = '<b>'+k+'</b>'+t.rotulo;
+    b.onclick = () => { diaAtivo = k; abertos.clear(); render(); };
+    alvo.appendChild(b);
+  });
+  const off = document.createElement('button');
+  off.className = 'dia' + (hojeDia === 4 ? ' hoje' : '') + (diaAtivo === 'OFF' ? ' on' : '');
+  off.innerHTML = '<b>—</b>Qui';
+  off.onclick = () => { diaAtivo = 'OFF'; render(); };
+  alvo.appendChild(off);
+  document.getElementById('sub').textContent =
+    diaAtivo === 'OFF' ? 'Quinta · descanso' : PLANO[diaAtivo].rotulo + ' · ' + PLANO[diaAtivo].nome;
+}
+
+/* ============================================================
+   ABA TREINO
+   ============================================================ */
+function renderTreino(){
+  const alvo = document.getElementById('abaTreino');
+  alvo.innerHTML = '';
+
+  if(diaAtivo === 'OFF'){
+    alvo.innerHTML = '<div class="vazio">'+
+      '<h3>Quinta é descanso</h3>'+
+      '<p>Sem sala de musculação hoje. O que rende aqui:</p>'+
+      '<ul><li>Alongamento de corpo inteiro — 45 a 60 segundos por posição, 2 a 3 séries</li>'+
+      '<li>Stomach vacuum — 3 séries de 45 a 90 segundos</li>'+
+      '<li>Cardio leve de 30 a 40 minutos, se a semana permitir</li></ul>'+
+      '<p style="margin-top:14px">Para registrar outro treino, toque na letra correspondente acima.</p></div>';
+    return;
+  }
+
+  const treino = PLANO[diaAtivo];
+  const sessao = sessaoAtual();
+  const totalSets = treino.ex.reduce((s,e) => s + e.sets, 0);
+
+  const faixa = document.createElement('div');
+  faixa.className = 'faixa';
+  faixa.innerHTML = '<h2>'+diaAtivo+' — '+treino.nome+'</h2><span>'+treino.ex.length+' exercícios · '+totalSets+' sets</span>';
+  alvo.appendChild(faixa);
+
+  const linhaData = document.createElement('div');
+  linhaData.className = 'datalinha';
+  linhaData.innerHTML = '<label for="data">Data</label>';
+  const inpData = document.createElement('input');
+  inpData.type = 'date'; inpData.id = 'data'; inpData.value = dataAtiva;
+  inpData.onchange = e => { dataAtiva = e.target.value || hojeISO(); render(); };
+  linhaData.appendChild(inpData);
+  const aviso = document.createElement('span');
+  aviso.className = 'salvo'; aviso.id = 'salvo';
+  linhaData.appendChild(aviso);
+  alvo.appendChild(linhaData);
+
+  treino.ex.forEach(ex => {
+    const reg = registroDe(sessao, ex);
+    const ant = ultimaVez(ex);
+    const un = ex.un || 'reps';
+    const tipos = tiposDeSerie(ex.tipo, ex.sets);
+    const qtdWS = tipos.filter(t => t === 'WS').length;
+
+    const card = document.createElement('div');
+    card.className = 'ex';
+
+    let meta = '<div class="ex-meta"><span>'+ex.sets+'x</span>';
+    if(ex.tipo) meta += '<code>'+ex.tipo+'</code>';
+    if(ex.obs) meta += '<span>'+ex.obs+'</span>';
+    meta += '<span class="delta" id="d-'+ex.id+'"></span></div>';
+    card.insertAdjacentHTML('beforeend','<div class="ex-topo"><div class="ex-nome">'+ex.nome+'</div>'+meta+'</div>');
+
+    const principal = document.createElement('div');
+    principal.className = 'principal';
+
+    const cKg = document.createElement('div');
+    cKg.className = 'campo';
+    const iKg = document.createElement('input');
+    iKg.type = 'text'; iKg.inputMode = 'decimal'; iKg.placeholder = '0';
+    iKg.value = reg.kg || '';
+    iKg.setAttribute('aria-label','Carga de trabalho de ' + ex.nome);
+    iKg.oninput = e => { reg.kg = e.target.value; atualizaDelta(ex, reg, ant); agendarSalvar(); };
+    cKg.appendChild(iKg);
+    cKg.insertAdjacentHTML('beforeend','<u>kg</u>');
+    principal.appendChild(cKg);
+
+    const cRep = document.createElement('div');
+    cRep.className = 'campo';
+    const iRep = document.createElement('input');
+    iRep.type = 'text'; iRep.inputMode = 'numeric'; iRep.placeholder = '0';
+    iRep.value = reg.reps || '';
+    iRep.setAttribute('aria-label','Repetições de ' + ex.nome);
+    iRep.oninput = e => { reg.reps = e.target.value; agendarSalvar(); };
+    cRep.appendChild(iRep);
+    cRep.insertAdjacentHTML('beforeend','<u>'+un+'</u>');
+    principal.appendChild(cRep);
+    card.appendChild(principal);
+
+    const rodape = document.createElement('div');
+    rodape.className = 'rodape-ex';
+    if(ant && (ant.reg.kg || ant.reg.reps)){
+      const bt = document.createElement('button');
+      bt.className = 'repetir';
+      bt.innerHTML = formataData(ant.data) + ': ' + (ant.reg.kg||'—') + ' kg × ' + (ant.reg.reps||'—');
+      bt.title = 'Usar os números da última vez';
+      bt.onclick = () => {
+        iKg.value = ant.reg.kg || ''; iRep.value = ant.reg.reps || '';
+        reg.kg = ant.reg.kg || ''; reg.reps = ant.reg.reps || '';
+        atualizaDelta(ex, reg, ant); agendarSalvar();
+      };
+      rodape.appendChild(bt);
+    }else{
+      rodape.insertAdjacentHTML('beforeend','<span>sem registro anterior</span>');
+    }
+
+    if(ex.sets > 1){
+      const abrir = document.createElement('button');
+      abrir.className = 'abrir';
+      const aberto = abertos.has(ex.id);
+      abrir.textContent = aberto ? 'fechar séries' : 'série por série';
+      abrir.onclick = () => {
+        if(abertos.has(ex.id)) abertos.delete(ex.id); else abertos.add(ex.id);
+        renderTreino();
+      };
+      rodape.appendChild(abrir);
+    }
+    card.appendChild(rodape);
+
+    if(abertos.has(ex.id) && ex.sets > 1){
+      const bloco = document.createElement('div');
+      bloco.className = 'series';
+      bloco.insertAdjacentHTML('beforeend',
+        '<div class="dica">Só preencha aqui quando a carga variar entre as séries — queda de rendimento, drop-set com peso diferente, troca de aparelho. O campo grande continua sendo a referência do exercício.</div>');
+      for(let i=0;i<ex.sets;i++){
+        const linha = document.createElement('div');
+        linha.className = 'linha';
+        linha.insertAdjacentHTML('beforeend','<div class="tag '+tipos[i]+'">'+(ex.tipo ? tipos[i] : (i+1))+'</div>');
+
+        const k = document.createElement('div');
+        k.className = 'campo';
+        const ik = document.createElement('input');
+        ik.type = 'text'; ik.inputMode = 'decimal';
+        ik.placeholder = tipos[i] === 'WS' ? (reg.kg || '0') : '0';
+        ik.value = reg.series[i].kg || '';
+        ik.oninput = e => { reg.series[i].kg = e.target.value; agendarSalvar(); };
+        k.appendChild(ik); k.insertAdjacentHTML('beforeend','<u>kg</u>');
+        linha.appendChild(k);
+
+        const r = document.createElement('div');
+        r.className = 'campo';
+        const ir = document.createElement('input');
+        ir.type = 'text'; ir.inputMode = 'numeric';
+        ir.placeholder = tipos[i] === 'WS' ? (reg.reps || '0') : '0';
+        ir.value = reg.series[i].reps || '';
+        ir.oninput = e => { reg.series[i].reps = e.target.value; agendarSalvar(); };
+        r.appendChild(ir); r.insertAdjacentHTML('beforeend','<u>'+un+'</u>');
+        linha.appendChild(r);
+
+        bloco.appendChild(linha);
+      }
+      card.appendChild(bloco);
+    }else if(qtdWS > 1){
+      card.insertAdjacentHTML('beforeend','<div class="dica" style="padding-top:0">'+qtdWS+' séries de trabalho com essa carga. Aquecimento e feeder não entram na conta.</div>');
+    }
+
+    alvo.appendChild(card);
+    setTimeout(() => atualizaDelta(ex, reg, ant), 0);
+  });
+
+  const fim = document.createElement('div');
+  fim.className = 'fim';
+  fim.innerHTML = '<h3>Como foi a sessão</h3>';
+  const pse = document.createElement('div');
+  pse.className = 'pse';
+  ['Tranquilo','Moderado','Muito desgastante'].forEach(nivel => {
+    const b = document.createElement('button');
+    b.textContent = nivel;
+    if(sessao.pse === nivel) b.classList.add('on');
+    b.onclick = () => { sessao.pse = sessao.pse === nivel ? '' : nivel; agendarSalvar(); renderTreino(); };
+    pse.appendChild(b);
+  });
+  fim.appendChild(pse);
+  const nota = document.createElement('textarea');
+  nota.placeholder = 'Dor, mal-estar, ajuste de execução, máquina ocupada, qualquer coisa que explique os números de hoje.';
+  nota.value = sessao.nota || '';
+  nota.oninput = e => { sessao.nota = e.target.value; agendarSalvar(); };
+  fim.appendChild(nota);
+  alvo.appendChild(fim);
+
+  alvo.insertAdjacentHTML('beforeend',
+    '<details class="leg"><summary>Legenda dos tipos de série</summary><div>'+
+    '<p><b>WU</b> — aquecimento, 20-25 reps, longe da falha (menos de 40-50%RM).</p>'+
+    '<p><b>FS</b> — série preparatória, 10-15 reps sem falha (acima de 60%RM), 1 a 1min30 de intervalo.</p>'+
+    '<p><b>WS</b> — série de trabalho, máxima carga para falhar entre 8-10 reps, 2 a 3 min de intervalo. <b>É essa a carga que o campo grande registra.</b></p>'+
+    '<p><b>RP</b> — falha, 10 s de descanso no aparelho, busca a falha de novo.</p>'+
+    '<p><b>DS</b> — falha, 5-10 s, tira 20-30% da carga e falha de novo.</p>'+
+    '<p><b>STS</b> — drop-set contínuo até zerar a máquina, com falhas consecutivas.</p>'+
+    '</div></details>');
+}
+
+function atualizaDelta(ex, reg, ant){
+  const alvo = document.getElementById('d-' + ex.id);
+  if(!alvo) return;
+  const hoje = numero(reg.kg);
+  const antes = ant ? numero(ant.reg.kg) : null;
+  if(hoje === null){ alvo.textContent = ''; alvo.className = 'delta'; return; }
+  if(antes === null){ alvo.textContent = 'primeiro registro'; alvo.className = 'delta eq'; return; }
+  const dif = arred(hoje - antes);
+  if(dif > 0){ alvo.textContent = '+' + dif + ' kg'; alvo.className = 'delta up'; }
+  else if(dif === 0){
+    const rHoje = numero(reg.reps), rAntes = numero(ant.reg.reps);
+    if(rHoje !== null && rAntes !== null && rHoje > rAntes){
+      alvo.textContent = '+' + (rHoje - rAntes) + ' rep'; alvo.className = 'delta up';
+    }else{
+      alvo.textContent = 'igual'; alvo.className = 'delta eq';
+    }
+  }
+  else { alvo.textContent = dif + ' kg'; alvo.className = 'delta down'; }
+}
+function arred(n){ return Math.round(n*100)/100; }
+function formataData(iso){ const p = iso.split('-'); return p[2]+'/'+p[1]; }
+function formataDataLonga(iso){
+  const p = iso.split('-');
+  const dias = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+  const dt = new Date(Number(p[0]), Number(p[1])-1, Number(p[2]));
+  return p[2]+'/'+p[1]+'/'+p[0]+' · '+dias[dt.getDay()];
+}
+function escapa(t){ const e = document.createElement('div'); e.textContent = t; return e.innerHTML; }
+
+/* ============================================================
+   HISTÓRICO
+   ============================================================ */
+function renderHistorico(){
+  const alvo = document.getElementById('abaHistorico');
+  const todas = Object.values(dados.sessoes)
+    .filter(s => Object.values(s.ex || {}).some(temAlgo))
+    .sort((a,b) => a.data < b.data ? 1 : -1);
+
+  if(!todas.length){
+    alvo.innerHTML = '<div class="vazio" style="margin-top:14px"><h3>Nada registrado ainda</h3>'+
+      '<p>Abra a aba Treino, escolha o dia e anote a carga de trabalho de cada exercício. A partir do segundo treino igual, o número da vez anterior aparece logo abaixo do campo.</p></div>';
+    return;
+  }
+
+  alvo.innerHTML = '<div class="faixa" style="border-radius:10px"><h2>Histórico</h2><span>'+todas.length+' sessões</span></div>';
+  todas.forEach(s => {
+    const treino = PLANO[s.dia];
+    if(!treino) return;
+    const feitos = treino.ex.filter(e => temAlgo(s.ex[e.id]));
+    const det = document.createElement('details');
+    det.className = 'sessao';
+    det.innerHTML = '<summary><span class="pill">'+s.dia+'</span>'+formataDataLonga(s.data)+
+      '<em>'+feitos.length+'/'+treino.ex.length+(s.pse ? ' · '+s.pse : '')+'</em></summary>';
+    const corpo = document.createElement('div');
+    corpo.className = 'detalhe';
+    feitos.forEach(e => {
+      let r = s.ex[e.id];
+      if(Array.isArray(r)){
+        const p = r.filter(v => v && (v.kg || v.reps));
+        r = {kg:(p[p.length-1]||{}).kg||'', reps:(p[p.length-1]||{}).reps||'', series:r};
+      }
+      let texto = (r.kg||'—') + ' kg × ' + (r.reps||'—');
+      const variacoes = (r.series||[]).filter(v => v && (v.kg || v.reps));
+      if(variacoes.length) texto += '  ·  ' + variacoes.map(v => (v.kg||'—')+'×'+(v.reps||'—')).join(' ');
+      corpo.insertAdjacentHTML('beforeend','<div><span>'+e.nome+'</span><span>'+texto+'</span></div>');
+    });
+    if(s.nota) corpo.insertAdjacentHTML('beforeend','<div class="nota">'+escapa(s.nota)+'</div>');
+    det.appendChild(corpo);
+    alvo.appendChild(det);
+  });
+}
+
+/* ============================================================
+   PROGRESSO
+   ============================================================ */
+function renderProgresso(){
+  const alvo = document.getElementById('abaProgresso');
+  alvo.innerHTML = '<div class="faixa" style="border-radius:10px"><h2>Progresso</h2><span>carga de trabalho</span></div>';
+
+  const sel = document.createElement('select');
+  sel.className = 'sel';
+  ORDEM.forEach(k => {
+    const grupo = document.createElement('optgroup');
+    grupo.label = k + ' — ' + PLANO[k].nome;
+    PLANO[k].ex.forEach(e => {
+      const o = document.createElement('option');
+      o.value = e.id; o.textContent = e.nome;
+      if(e.id === exProgresso) o.selected = true;
+      grupo.appendChild(o);
+    });
+    sel.appendChild(grupo);
+  });
+  sel.onchange = e => { exProgresso = e.target.value; renderProgresso(); };
+  alvo.appendChild(sel);
+
+  let diaDoEx = null;
+  ORDEM.forEach(k => PLANO[k].ex.forEach(e => { if(e.id === exProgresso) diaDoEx = k; }));
+
+  const pontos = Object.values(dados.sessoes)
+    .filter(s => s.dia === diaDoEx && temAlgo(s.ex && s.ex[exProgresso]))
+    .map(s => {
+      let r = s.ex[exProgresso];
+      if(Array.isArray(r)){
+        const p = r.filter(v => v && (v.kg || v.reps));
+        r = {kg:(p[p.length-1]||{}).kg||'', reps:(p[p.length-1]||{}).reps||''};
+      }
+      return {data:s.data, kg:numero(r.kg), reps:r.reps};
+    })
+    .filter(p => p.kg !== null)
+    .sort((a,b) => a.data < b.data ? -1 : 1);
+
+  if(pontos.length < 2){
+    alvo.insertAdjacentHTML('beforeend','<div class="vazio" style="margin-top:10px"><h3>Faltam registros</h3>'+
+      '<p>O gráfico aparece a partir de duas sessões com este exercício anotado.</p></div>');
+    return;
+  }
+
+  const kgs = pontos.map(p => p.kg);
+  const max = Math.max.apply(null, kgs), min = Math.min.apply(null, kgs);
+  const folga = Math.max((max-min)*0.25, 2.5);
+  const teto = max + folga, piso = Math.max(0, min - folga);
+  const L = 300, A = 120, pad = 6;
+  const x = i => pad + i*((L-pad*2)/Math.max(pontos.length-1,1));
+  const y = v => A - ((v-piso)/(teto-piso || 1))*(A-14) - 7;
+
+  let caminho = '', bolas = '';
+  pontos.forEach((p,i) => {
+    caminho += (i ? ' L ' : 'M ') + x(i).toFixed(1) + ' ' + y(p.kg).toFixed(1);
+    bolas += '<circle cx="'+x(i).toFixed(1)+'" cy="'+y(p.kg).toFixed(1)+'" r="3.2" fill="#E8620C"/>';
+  });
+  const primeiro = kgs[0], ultimo = kgs[kgs.length-1];
+  const ganho = arred(ultimo - primeiro);
+  const pct = primeiro ? Math.round((ultimo-primeiro)/primeiro*1000)/10 : 0;
+
+  alvo.insertAdjacentHTML('beforeend',
+    '<div class="graf">'+
+    '<svg viewBox="0 0 '+L+' '+A+'" preserveAspectRatio="none" role="img" aria-label="Evolução da carga de trabalho">'+
+    '<line x1="'+pad+'" y1="'+y(max).toFixed(1)+'" x2="'+(L-pad)+'" y2="'+y(max).toFixed(1)+'" stroke="#DCD8D1" stroke-width="1" stroke-dasharray="3 3"/>'+
+    '<path d="'+caminho+'" fill="none" stroke="#E8620C" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>'+
+    bolas+'</svg>'+
+    '<div class="graf-legenda">De '+arred(primeiro)+' kg em '+formataData(pontos[0].data)+' para '+arred(ultimo)+
+    ' kg em '+formataData(pontos[pontos.length-1].data)+' — '+(ganho >= 0 ? 'ganho' : 'queda')+' de '+
+    Math.abs(ganho)+' kg ('+(pct > 0 ? '+' : '')+pct+'%). Pico: '+arred(max)+' kg.</div>'+
+    '<div class="tabela">'+
+    pontos.slice().reverse().map(p => '<div><span>'+formataDataLonga(p.data)+'</span><span>'+arred(p.kg)+' kg × '+(p.reps||'—')+'</span></div>').join('')+
+    '</div></div>');
+}
+
+/* ============================================================
+   BACKUP
+   ============================================================ */
+document.getElementById('btExport').onclick = () => {
+  const blob = new Blob([JSON.stringify(dados, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'treino-rafael-' + hojeISO() + '.json';
+  a.click(); URL.revokeObjectURL(url);
+};
+document.getElementById('btImport').onclick = () => document.getElementById('arquivo').click();
+document.getElementById('arquivo').onchange = e => {
+  const f = e.target.files[0];
+  if(!f) return;
+  const leitor = new FileReader();
+  leitor.onload = async ev => {
+    try{
+      const novo = JSON.parse(ev.target.result);
+      if(!novo || !novo.sessoes) throw new Error('formato');
+      Object.assign(dados.sessoes, novo.sessoes);
+      await gravar(dados);
+      render();
+      alert('Backup restaurado. Sessões no arquivo: ' + Object.keys(novo.sessoes).length);
+    }catch(err){
+      alert('O arquivo não é um backup válido deste registro. Use um .json baixado pelo botão de download.');
+    }
+  };
+  leitor.readAsText(f);
+  e.target.value = '';
+};
+
+/* ============================================================
+   CRONÔMETRO
+   ============================================================ */
+let restante = 0, tick = null;
+const btTimer = document.getElementById('btTimer');
+const presets = document.getElementById('presets');
+btTimer.onclick = () => { if(tick){ pararTimer(); return; } presets.classList.toggle('ver'); };
+presets.querySelectorAll('button').forEach(b => {
+  b.onclick = () => {
+    presets.classList.remove('ver');
+    restante = Number(b.dataset.s);
+    btTimer.classList.add('rodando');
+    mostraTimer();
+    clearInterval(tick);
+    tick = setInterval(() => {
+      restante--;
+      mostraTimer();
+      if(restante <= 0){
+        pararTimer();
+        btTimer.textContent = 'Vai!';
+        if(navigator.vibrate) navigator.vibrate([200,100,200]);
+        setTimeout(() => { if(!tick) btTimer.textContent = 'Descanso'; }, 4000);
+      }
+    }, 1000);
+  };
+});
+function mostraTimer(){
+  const m = Math.floor(Math.max(restante,0)/60), s = Math.max(restante,0)%60;
+  btTimer.textContent = m + ':' + String(s).padStart(2,'0');
+}
+function pararTimer(){
+  clearInterval(tick); tick = null; restante = 0;
+  btTimer.classList.remove('rodando');
+  btTimer.textContent = 'Descanso';
+}
+
+/* ============================================================
+   NAVEGAÇÃO
+   ============================================================ */
+document.querySelectorAll('nav button').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('nav button').forEach(o => o.classList.remove('on'));
+    b.classList.add('on');
+    abaAtiva = b.dataset.aba;
+    render();
+    window.scrollTo({top:0});
+  };
+});
+
+function render(){
+  renderDias();
+  document.getElementById('abaTreino').classList.toggle('oculto', abaAtiva !== 'Treino');
+  document.getElementById('abaHistorico').classList.toggle('oculto', abaAtiva !== 'Historico');
+  document.getElementById('abaProgresso').classList.toggle('oculto', abaAtiva !== 'Progresso');
+  if(abaAtiva === 'Treino') renderTreino();
+  if(abaAtiva === 'Historico') renderHistorico();
+  if(abaAtiva === 'Progresso') renderProgresso();
+}
+
+(async function(){
+  dados = await carregar();
+  if(!dados.sessoes) dados.sessoes = {};
+  const hojeDia = new Date().getDay();
+  const doDia = ORDEM.find(k => PLANO[k].diaSemana === hojeDia);
+  diaAtivo = hojeDia === 4 ? 'OFF' : (doDia || 'A');
+  render();
+})();
+</script>
+</body>
+</html>
